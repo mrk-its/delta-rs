@@ -109,6 +109,25 @@ pub(crate) fn get_stale_files(
         .collect::<HashSet<_>>())
 }
 
+/// List files no longer referenced by a Delta table and are older than the retention threshold.
+pub(crate) fn get_unexpired_tombstones(
+    table: &DeltaTable,
+    tombstone_retention_timestamp: i64,
+) -> Result<HashSet<&str>, VacuumError> {
+    Ok(table
+        .state
+        .all_tombstones()
+        .iter()
+        .filter(|tombstone| {
+            // if the file has a creation time before the `tombstone_retention_timestamp`
+            // then it's considered as a stale file
+            tombstone.deletion_timestamp.unwrap_or(0) >= tombstone_retention_timestamp
+        })
+        .map(|tombstone| tombstone.path.as_str())
+        .collect::<HashSet<_>>())
+}
+
+
 /// Whether a path should be hidden for delta-related file operations, such as Vacuum.
 /// Names of the form partitionCol=[value] are partition directories, and should be
 /// deleted even if they'd normally be hidden. The _db_index directory contains (bloom filter)
@@ -179,7 +198,12 @@ pub async fn create_vacuum_plan(
         None => Utc::now().timestamp_millis(),
     };
 
-    let expired_tombstones = get_stale_files(table, retention_period, now_millis)?;
+    let tombstone_retention_timestamp = now_millis - retention_period.num_milliseconds();
+    // let expired_tombstones = get_stale_files(table, retention_period, now_millis)?;
+    let unexpired_tombstones = get_unexpired_tombstones(table, tombstone_retention_timestamp)?;
+
+    // log::info!("unexpired_tombstones: {:?}", unexpired_tombstones);
+
     let valid_files = table.get_file_set();
 
     let mut files_to_delete = vec![];
@@ -193,13 +217,17 @@ pub async fn create_vacuum_plan(
         // TODO should we allow NotFound here in case we have a temporary commit file in the list
         let obj_meta = obj_meta.map_err(DeltaTableError::from)?;
         if valid_files.contains(&obj_meta.location) // file is still being tracked in table
-            || !expired_tombstones.contains(obj_meta.location.as_ref()) // file is not an expired tombstone
+            || unexpired_tombstones.contains(obj_meta.location.as_ref()) // file is not an expired tombstone
+            || obj_meta.last_modified.timestamp_millis() >= tombstone_retention_timestamp
             || is_hidden_directory(table, &obj_meta.location)?
         {
             continue;
         }
 
         files_to_delete.push(obj_meta.location);
+        if files_to_delete.len() % 1000 == 0 {
+            log::debug!("files to delete: {}", files_to_delete.len());
+        }
     }
 
     Ok(VacuumPlan { files_to_delete })
