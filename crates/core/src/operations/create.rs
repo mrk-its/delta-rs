@@ -356,7 +356,10 @@ impl std::future::IntoFuture for CreateBuilder {
             let table_state = if table.log_store.is_delta_table_location().await? {
                 match mode {
                     SaveMode::ErrorIfExists => return Err(CreateError::TableAlreadyExists.into()),
-                    SaveMode::Append => return Err(CreateError::AppendNotAllowed.into()),
+                    SaveMode::Append => {
+                        table.load().await?;
+                        Some(table.snapshot()?)
+                    }
                     SaveMode::Ignore => {
                         table.load().await?;
                         return Ok(table);

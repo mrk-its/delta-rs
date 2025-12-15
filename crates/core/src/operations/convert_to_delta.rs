@@ -317,11 +317,10 @@ impl ConvertToDeltaBuilder {
 
         let operation_id = self.get_operation_id();
         self.pre_execute(operation_id).await?;
-
         // Return an error if the location is already a Delta table location
-        if self.log_store().is_delta_table_location().await? {
-            return Err(Error::DeltaTableAlready);
-        }
+        // if self.log_store().is_delta_table_location().await? {
+        //     return Err(Error::DeltaTableAlready);
+        // }
         debug!(
             "Converting Parquet table in log store location: {:?}",
             self.log_store().root_url()

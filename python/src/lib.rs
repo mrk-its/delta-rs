@@ -2638,7 +2638,7 @@ fn convert_to_deltalake(
         {
             builder = builder.with_commit_properties(commit_properties);
         };
-
+        builder = builder.with_save_mode(SaveMode::Append);
         if uri.starts_with("lakefs://") {
             builder = builder.with_custom_execute_handler(Arc::new(LakeFSCustomExecuteHandler {}))
         }
