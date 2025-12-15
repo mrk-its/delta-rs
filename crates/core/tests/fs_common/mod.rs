@@ -66,7 +66,7 @@ pub async fn create_table(
     path: &str,
     config: Option<HashMap<String, Option<String>>>,
 ) -> DeltaTable {
-    let log_dir = Path::new(path).join("_delta_log");
+    let log_dir = Path::new(path).join("_delta_lag");
     fs::create_dir_all(&log_dir).unwrap();
     cleanup_dir_except(log_dir, vec![]);
 

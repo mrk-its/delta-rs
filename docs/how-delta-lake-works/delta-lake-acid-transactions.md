@@ -40,7 +40,7 @@ Here are the files created in storage.
 ```
 tmp/my-delta-table
 ├── 0-fea2de92-861a-423e-9708-a9e91dafb27b-0.parquet
-└── _delta_log
+└── _delta_lag
     └── 00000000000000000000.json
 ```
 
@@ -56,7 +56,7 @@ Let’s take a look at the contents of the Delta table now that the transaction 
 ```
 tmp/my-delta-table
 ├── 0-fea2de92-861a-423e-9708-a9e91dafb27b-0.parquet
-├── _delta_log
+├── _delta_lag
 │   ├── 00000000000000000000.json
 │   └── 00000000000000000001.json
 └── part-00001-90312b96-b487-4a8f-9edc-1b9b3963f136-c000.snappy.parquet
@@ -117,7 +117,7 @@ We can see that this transaction includes two components:
 - Remove file `0-fea2de92-861a-423e-9708-a9e91dafb27b-0.parquet`
 - Add file `part-00001-90312b96-b487-4a8f-9edc-1b9b3963f136-c000.snappy.parquet`
 
-Transactions are recorded in the transaction log. The transaction log is also referred to as the table metadata and is the `_delta_log` directory in storage.
+Transactions are recorded in the transaction log. The transaction log is also referred to as the table metadata and is the `_delta_lag` directory in storage.
 
 Let’s see how Delta Lake implements transactions.
 

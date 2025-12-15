@@ -1,5 +1,5 @@
 //! Actions are the fundamental unit of work in Delta Lake. Each action performs a single atomic
-//! operation on the state of a Delta table. Actions are stored in the `_delta_log` directory of a
+//! operation on the state of a Delta table. Actions are stored in the `_delta_lag` directory of a
 //! Delta table in JSON format. The log is a time series of actions that represent all the changes
 //! made to a table.
 

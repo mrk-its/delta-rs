@@ -547,7 +547,7 @@ mod tests {
             let file = file.expect("Failed to read file");
             let name = file.file_name();
             // Skip Delta log
-            if name.to_str() != Some("_delta_log") {
+            if name.to_str() != Some("_delta_lag") {
                 if file.file_type().expect("Failed to get file type").is_dir() {
                     copy_files(file.path(), dst.as_ref().join(name));
                 } else {

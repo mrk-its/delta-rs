@@ -17,7 +17,7 @@ use crate::logstore::{StorageConfig, store_for};
 use crate::open_table_with_storage_options;
 use crate::table::builder::ensure_table_uri;
 
-const DELTA_LOG_FOLDER: &str = "_delta_log";
+const DELTA_LOG_FOLDER: &str = "_delta_lag";
 
 /// A `SchemaProvider` that scans an `ObjectStore` to automatically discover delta tables.
 ///
@@ -28,8 +28,8 @@ const DELTA_LOG_FOLDER: &str = "_delta_log";
 /// A table called "customer" will be registered for the folder:
 /// s3://host.example.com:3000/data/tpch/customer
 ///
-/// assuming it contains valid deltalake data, i.e a `_delta_log` folder:
-/// s3://host.example.com:3000/data/tpch/customer/_delta_log/
+/// assuming it contains valid deltalake data, i.e a `_delta_lag` folder:
+/// s3://host.example.com:3000/data/tpch/customer/_delta_lag/
 #[derive(Debug)]
 pub struct ListingSchemaProvider {
     authority: String,

@@ -128,9 +128,9 @@ pub fn register_handlers(_additional_prefixes: Option<Url>) {
 #[derive(Debug, PartialEq, TypedBuilder)]
 #[builder(doc)]
 pub struct CommitEntry {
-    /// Commit version, stored as file name (e.g., 00000N.json) in dynamodb (relative to `_delta_log/`)
+    /// Commit version, stored as file name (e.g., 00000N.json) in dynamodb (relative to `_delta_lag/`)
     pub version: i64,
-    /// Path to temp file for this commit, relative to the `_delta_log` directory
+    /// Path to temp file for this commit, relative to the `_delta_lag` directory
     #[builder(setter(into))]
     pub temp_path: Path,
     /// true if delta json file is successfully copied to its destination location, else false
@@ -650,7 +650,7 @@ fn create_value_map(
     commit_entry: &CommitEntry,
     table_path: &str,
 ) -> HashMap<String, AttributeValue> {
-    // cut off `_delta_log` part: temp_path in DynamoDb is relative to `_delta_log` not table root.
+    // cut off `_delta_lag` part: temp_path in DynamoDb is relative to `_delta_lag` not table root.
     let temp_path = Path::from_iter(commit_entry.temp_path.parts().skip(1));
     let mut value_map = get_primary_key(commit_entry.version, table_path);
 
@@ -756,7 +756,7 @@ fn num_attr<T: ToString>(n: T) -> AttributeValue {
     AttributeValue::N(n.to_string())
 }
 
-static DELTA_LOG_PATH: LazyLock<Path> = LazyLock::new(|| Path::from("_delta_log"));
+static DELTA_LOG_PATH: LazyLock<Path> = LazyLock::new(|| Path::from("_delta_lag"));
 static DELTA_LOG_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(\d{20})\.(json|checkpoint).*$").unwrap());
 
@@ -817,7 +817,7 @@ mod tests {
         commit_entry_roundtrip(
             &CommitEntry::builder()
                 .version(0)
-                .temp_path(Path::from("_delta_log/tmp/0_abc.json"))
+                .temp_path(Path::from("_delta_lag/tmp/0_abc.json"))
                 .complete(true)
                 .expire_time(system_time)
                 .build(),
@@ -825,7 +825,7 @@ mod tests {
         commit_entry_roundtrip(
             &CommitEntry::builder()
                 .version(139)
-                .temp_path(Path::from("_delta_log/tmp/0_abc.json"))
+                .temp_path(Path::from("_delta_lag/tmp/0_abc.json"))
                 .build(),
         )?;
         Ok(())

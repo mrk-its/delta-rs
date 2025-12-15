@@ -78,12 +78,12 @@ pub trait Clock: Debug + Send + Sync {
 /// Type of Vacuum operation to perform
 #[derive(Debug, Default, Clone, PartialEq)]
 pub enum VacuumMode {
-    /// The `lite` mode will only remove files which are referenced in the `_delta_log` associated
+    /// The `lite` mode will only remove files which are referenced in the `_delta_lag` associated
     /// with `remove` action
     #[default]
     Lite,
     /// A `full` mode vacuum will remove _all_ data files no longer actively referenced in the
-    /// `_delta_log` table. For example, if parquet files exist in the table directory but are no
+    /// `_delta_lag` table. For example, if parquet files exist in the table directory but are no
     /// longer mentioned as `add` actions in the transaction log, then this mode will scan storage
     /// and remove those files.
     Full,
@@ -588,7 +588,7 @@ mod tests {
         let mut files_deleted = result.files_deleted.clone();
         files_deleted.sort();
         // When running with full, these superfluous parquet files which are not actually
-        // referenced in the _delta_log commits should be considered for the
+        // referenced in the _delta_lag commits should be considered for the
         // low-orbit ion-cannon
         assert_eq!(
             files_deleted,

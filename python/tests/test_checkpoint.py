@@ -22,9 +22,9 @@ if TYPE_CHECKING:
 
 def test_checkpoint(tmp_path: pathlib.Path, sample_table: Table):
     tmp_table_path = tmp_path / "path" / "to" / "table"
-    checkpoint_path = tmp_table_path / "_delta_log" / "_last_checkpoint"
+    checkpoint_path = tmp_table_path / "_delta_lag" / "_last_checkpoint"
     last_checkpoint_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000000.checkpoint.parquet"
+        tmp_table_path / "_delta_lag" / "00000000000000000000.checkpoint.parquet"
     )
     write_deltalake(str(tmp_table_path), sample_table)
 
@@ -39,15 +39,15 @@ def test_checkpoint(tmp_path: pathlib.Path, sample_table: Table):
 
 def setup_cleanup_metadata(tmp_path: pathlib.Path, sample_table: Table):
     tmp_table_path = tmp_path / "path" / "to" / "table"
-    first_log_path = tmp_table_path / "_delta_log" / "00000000000000000000.json"
+    first_log_path = tmp_table_path / "_delta_lag" / "00000000000000000000.json"
     first_failed_log_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000000.json.tmp"
+        tmp_table_path / "_delta_lag" / "00000000000000000000.json.tmp"
     )
-    second_log_path = tmp_table_path / "_delta_log" / "00000000000000000001.json"
+    second_log_path = tmp_table_path / "_delta_lag" / "00000000000000000001.json"
     second_failed_log_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000002.json.tmp"
+        tmp_table_path / "_delta_lag" / "00000000000000000002.json.tmp"
     )
-    third_log_path = tmp_table_path / "_delta_log" / "00000000000000000002.json"
+    third_log_path = tmp_table_path / "_delta_lag" / "00000000000000000002.json"
 
     # Create few log files
     write_deltalake(str(tmp_table_path), sample_table)
@@ -86,14 +86,14 @@ def test_cleanup_metadata(tmp_path: pathlib.Path, sample_table: Table):
 
     tmp_table_path = tmp_path / "path" / "to" / "table"
     first_failed_log_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000000.json.tmp"
+        tmp_table_path / "_delta_lag" / "00000000000000000000.json.tmp"
     )
-    first_log_path = tmp_table_path / "_delta_log" / "00000000000000000000.json"
-    second_log_path = tmp_table_path / "_delta_log" / "00000000000000000001.json"
+    first_log_path = tmp_table_path / "_delta_lag" / "00000000000000000000.json"
+    second_log_path = tmp_table_path / "_delta_lag" / "00000000000000000001.json"
     second_failed_log_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000002.json.tmp"
+        tmp_table_path / "_delta_lag" / "00000000000000000002.json.tmp"
     )
-    third_log_path = tmp_table_path / "_delta_log" / "00000000000000000002.json"
+    third_log_path = tmp_table_path / "_delta_lag" / "00000000000000000002.json"
 
     # These first two files are kept because there is no safe checkpoint to make them obsolete
     assert first_log_path.exists()
@@ -111,14 +111,14 @@ def test_cleanup_metadata_log_cleanup_hook(tmp_path: pathlib.Path, sample_table:
 
     tmp_table_path = tmp_path / "path" / "to" / "table"
     first_failed_log_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000000.json.tmp"
+        tmp_table_path / "_delta_lag" / "00000000000000000000.json.tmp"
     )
-    first_log_path = tmp_table_path / "_delta_log" / "00000000000000000000.json"
-    second_log_path = tmp_table_path / "_delta_log" / "00000000000000000001.json"
+    first_log_path = tmp_table_path / "_delta_lag" / "00000000000000000000.json"
+    second_log_path = tmp_table_path / "_delta_lag" / "00000000000000000001.json"
     second_failed_log_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000002.json.tmp"
+        tmp_table_path / "_delta_lag" / "00000000000000000002.json.tmp"
     )
-    third_log_path = tmp_table_path / "_delta_log" / "00000000000000000002.json"
+    third_log_path = tmp_table_path / "_delta_lag" / "00000000000000000002.json"
 
     # These first two files are kept because there is no safe checkpoint to make them obsolete
     assert first_log_path.exists()
@@ -143,14 +143,14 @@ def test_cleanup_metadata_log_cleanup_hook_disabled(
 
     tmp_table_path = tmp_path / "path" / "to" / "table"
     first_failed_log_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000000.json.tmp"
+        tmp_table_path / "_delta_lag" / "00000000000000000000.json.tmp"
     )
-    first_log_path = tmp_table_path / "_delta_log" / "00000000000000000000.json"
-    second_log_path = tmp_table_path / "_delta_log" / "00000000000000000001.json"
+    first_log_path = tmp_table_path / "_delta_lag" / "00000000000000000000.json"
+    second_log_path = tmp_table_path / "_delta_lag" / "00000000000000000001.json"
     second_failed_log_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000002.json.tmp"
+        tmp_table_path / "_delta_lag" / "00000000000000000002.json.tmp"
     )
-    third_log_path = tmp_table_path / "_delta_log" / "00000000000000000002.json"
+    third_log_path = tmp_table_path / "_delta_lag" / "00000000000000000002.json"
 
     assert first_log_path.exists()
     assert first_failed_log_path.exists()
@@ -165,14 +165,14 @@ def test_cleanup_metadata_no_checkpoint(tmp_path: pathlib.Path, sample_table: Ta
 
     tmp_table_path = tmp_path / "path" / "to" / "table"
     first_failed_log_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000000.json.tmp"
+        tmp_table_path / "_delta_lag" / "00000000000000000000.json.tmp"
     )
-    first_log_path = tmp_table_path / "_delta_log" / "00000000000000000000.json"
-    second_log_path = tmp_table_path / "_delta_log" / "00000000000000000001.json"
+    first_log_path = tmp_table_path / "_delta_lag" / "00000000000000000000.json"
+    second_log_path = tmp_table_path / "_delta_lag" / "00000000000000000001.json"
     second_failed_log_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000002.json.tmp"
+        tmp_table_path / "_delta_lag" / "00000000000000000002.json.tmp"
     )
-    third_log_path = tmp_table_path / "_delta_log" / "00000000000000000002.json"
+    third_log_path = tmp_table_path / "_delta_lag" / "00000000000000000002.json"
 
     assert first_log_path.exists()
     assert first_failed_log_path.exists()
@@ -231,7 +231,7 @@ def test_features_null_on_below_v3_v7(tmp_path: pathlib.Path):
     assert current_protocol == protocol_after_checkpoint
 
     checkpoint = pq.read_table(
-        os.path.join(tmp_path, "_delta_log/00000000000000000000.checkpoint.parquet")
+        os.path.join(tmp_path, "_delta_lag/00000000000000000000.checkpoint.parquet")
     )
 
     assert checkpoint["protocol"][0]["writerFeatures"].as_py() is None
@@ -287,9 +287,9 @@ def test_checkpoint_partition_timestamp_2380(
     tmp_path: pathlib.Path, sample_all_types: "pa.Table", part_col: str
 ):
     tmp_table_path = tmp_path / "path" / "to" / "table"
-    checkpoint_path = tmp_table_path / "_delta_log" / "_last_checkpoint"
+    checkpoint_path = tmp_table_path / "_delta_lag" / "_last_checkpoint"
     last_checkpoint_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000000.checkpoint.parquet"
+        tmp_table_path / "_delta_lag" / "00000000000000000000.checkpoint.parquet"
     )
 
     # TODO: Include binary after fixing issue "Json error: binary type is not supported"
@@ -351,12 +351,12 @@ def test_checkpoint_post_commit_config(
 ):
     """Checks whether checkpoints are properly written based on commit_interval"""
     tmp_table_path = tmp_path / "path" / "to" / "table"
-    checkpoint_path = tmp_table_path / "_delta_log" / "_last_checkpoint"
+    checkpoint_path = tmp_table_path / "_delta_lag" / "_last_checkpoint"
     first_checkpoint_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000004.checkpoint.parquet"
+        tmp_table_path / "_delta_lag" / "00000000000000000004.checkpoint.parquet"
     )
     second_checkpoint_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000009.checkpoint.parquet"
+        tmp_table_path / "_delta_lag" / "00000000000000000009.checkpoint.parquet"
     )
 
     # TODO: Include binary after fixing issue "Json error: binary type is not supported"
@@ -389,7 +389,7 @@ def test_checkpoint_post_commit_config(
         if i in [4, 9]:
             continue
         random_checkpoint_path = (
-            tmp_table_path / "_delta_log" / f"{str(i).zfill(20)}.checkpoint.parquet"
+            tmp_table_path / "_delta_lag" / f"{str(i).zfill(20)}.checkpoint.parquet"
         )
         assert not random_checkpoint_path.exists()
 
@@ -402,12 +402,12 @@ def test_checkpoint_post_commit_config_multiple_operations(
 ):
     """Checks whether checkpoints are properly written based on commit_interval"""
     tmp_table_path = tmp_path / "path" / "to" / "table"
-    checkpoint_path = tmp_table_path / "_delta_log" / "_last_checkpoint"
+    checkpoint_path = tmp_table_path / "_delta_lag" / "_last_checkpoint"
     first_checkpoint_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000004.checkpoint.parquet"
+        tmp_table_path / "_delta_lag" / "00000000000000000004.checkpoint.parquet"
     )
     second_checkpoint_path = (
-        tmp_table_path / "_delta_log" / "00000000000000000009.checkpoint.parquet"
+        tmp_table_path / "_delta_lag" / "00000000000000000009.checkpoint.parquet"
     )
 
     for i in range(4):
@@ -446,7 +446,7 @@ def test_checkpoint_post_commit_config_multiple_operations(
         if i in [4, 9]:
             continue
         random_checkpoint_path = (
-            tmp_table_path / "_delta_log" / f"{str(i).zfill(20)}.checkpoint.parquet"
+            tmp_table_path / "_delta_lag" / f"{str(i).zfill(20)}.checkpoint.parquet"
         )
         assert not random_checkpoint_path.exists()
 
@@ -457,7 +457,7 @@ def test_checkpoint_post_commit_config_multiple_operations(
 @pytest.mark.pyarrow
 def test_checkpoint_with_nullable_false(tmp_path: pathlib.Path):
     tmp_table_path = tmp_path / "path" / "to" / "table"
-    checkpoint_path = tmp_table_path / "_delta_log" / "_last_checkpoint"
+    checkpoint_path = tmp_table_path / "_delta_lag" / "_last_checkpoint"
     import pyarrow as pa
 
     pylist = [{"year": 2023, "n_party": 0}, {"year": 2024, "n_party": 1}]

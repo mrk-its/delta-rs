@@ -88,7 +88,7 @@ This is because the Delta Lake has been partitioned by country:
 
 ```
 > !ls ../../data/people_countries_delta_dask
-_delta_log        country=Argentina country=China     country=Germany
+_delta_lag        country=Argentina country=China     country=Germany
 ```
 
 `dask-deltatable` neatly reads in the partitioned Delta Lake into corresponding Dask DataFrame partitions:

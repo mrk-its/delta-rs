@@ -49,7 +49,7 @@ Here are the contents of the Delta table:
 tmp/a_table
 ├── 0-7d414a88-a634-4c2f-9c5b-c29b6ee5f524-0.parquet
 ├── 1-0617ef60-b17b-46a5-9b0f-c7dda1b73eee-0.parquet
-└── _delta_log
+└── _delta_lag
     ├── 00000000000000000000.json
     └── 00000000000000000001.json
 ```

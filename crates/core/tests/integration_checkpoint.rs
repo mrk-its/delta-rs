@@ -143,7 +143,7 @@ async fn test_issue_1420_cleanup_expired_logs_for() -> DeltaResult<()> {
         table
             .log_store()
             .object_store(None)
-            .head(&Path::from(format!("_delta_log/{:020}.json", 1)))
+            .head(&Path::from(format!("_delta_lag/{:020}.json", 1)))
             .await
             .is_err(),
         "commit should not exist"
@@ -153,7 +153,7 @@ async fn test_issue_1420_cleanup_expired_logs_for() -> DeltaResult<()> {
         table
             .log_store()
             .object_store(None)
-            .head(&Path::from(format!("_delta_log/{:020}.json", 2)))
+            .head(&Path::from(format!("_delta_lag/{:020}.json", 2)))
             .await
             .is_ok(),
         "commit should exist"
@@ -164,7 +164,7 @@ async fn test_issue_1420_cleanup_expired_logs_for() -> DeltaResult<()> {
             .log_store()
             .object_store(None)
             .head(&Path::from(format!(
-                "_delta_log/{:020}.checkpoint.parquet",
+                "_delta_lag/{:020}.checkpoint.parquet",
                 2
             )))
             .await
@@ -189,7 +189,7 @@ async fn test_issue_1420_cleanup_expired_logs_for() -> DeltaResult<()> {
         table
             .log_store()
             .object_store(None)
-            .head(&Path::from(format!("_delta_log/{:020}.json", 2)))
+            .head(&Path::from(format!("_delta_lag/{:020}.json", 2)))
             .await
             .is_ok(),
         "commit should exist"
@@ -200,7 +200,7 @@ async fn test_issue_1420_cleanup_expired_logs_for() -> DeltaResult<()> {
             .log_store()
             .object_store(None)
             .head(&Path::from(format!(
-                "_delta_log/{:020}.checkpoint.parquet",
+                "_delta_lag/{:020}.checkpoint.parquet",
                 2
             )))
             .await
