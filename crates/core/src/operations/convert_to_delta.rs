@@ -333,8 +333,10 @@ impl ConvertToDeltaBuilder {
             .list(None)
             .try_for_each_concurrent(10, |meta| {
                 if Some("parquet") == meta.location.extension() {
-                    debug!("Found parquet file {:#?}", meta.location);
-                    files.push(meta);
+                    if meta.location.as_ref() <= "~" {
+                        debug!("Found parquet file {:#?}", meta.location);
+                        files.push(meta);
+                    }
                 }
                 future::ready(Ok(()))
             })
