@@ -18,7 +18,7 @@ use itertools::Itertools;
 use parquet::arrow::async_reader::{ParquetObjectReader, ParquetRecordBatchStreamBuilder};
 use parquet::errors::ParquetError;
 use percent_encoding::percent_decode_str;
-use tracing::debug;
+use tracing::{debug, info};
 use uuid::Uuid;
 
 use super::{CustomExecuteHandler, Operation};
