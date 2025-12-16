@@ -186,7 +186,7 @@ Here’s how the files are persisted in storage.
 
 ```
 observation_data
-├── _delta_lag
+├── _delta_log
 │   ├── 00000000000000000000.json
 │   ├── …
 │   └── 00000000000000000099.json
@@ -372,7 +372,7 @@ To optimize a single partition, you can pass in a `partition_filters` argument s
 ```
 
 This optimize operation tombstones 21 small data files and adds one file with all the existing
-data properly condensed.  Let’s take a look a portion of the `_delta_lag/00000000000000000125.json`
+data properly condensed.  Let’s take a look a portion of the `_delta_log/00000000000000000125.json`
 file, which is the transaction log entry that corresponds with this incremental optimize command.
 
 ```python
@@ -467,7 +467,7 @@ Let’s look at the content of the Delta table now that all the really small fil
 
 ```
 observation_data
-├── _delta_lag
+├── _delta_log
 │   ├── 00000000000000000000.json
 │   ├── 00000000000000000001.json
 │   ├── …

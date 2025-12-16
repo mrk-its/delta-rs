@@ -9,7 +9,7 @@ async fn time_travel_by_ds() {
     // test time travel on a table with an uncommitted delta in a .tmp subfolder
 
     // git does not preserve mtime, so we need to manually set it in the test
-    let log_dir = "../test/tests/data/simple_table/_delta_lag";
+    let log_dir = "../test/tests/data/simple_table/_delta_log";
     let log_mtime_pair = vec![
         ("00000000000000000000.json", "2020-05-01T22:47:31-07:00"),
         ("00000000000000000001.json", "2020-05-02T22:47:31-07:00"),
@@ -108,7 +108,7 @@ async fn time_travel_by_ds() {
 #[tokio::test]
 async fn time_travel_by_ds_checkpoint_vacuumed() {
     // git does not preserve mtime, so we need to manually set it in the test
-    let log_dir = "../test/tests/data/checkpoints_vacuumed/_delta_lag";
+    let log_dir = "../test/tests/data/checkpoints_vacuumed/_delta_log";
     let log_mtime_pair = vec![
         (
             "00000000000000000005.checkpoint.parquet",
@@ -157,7 +157,7 @@ async fn time_travel_by_ds_checkpoint_vacuumed() {
     assert_eq!(latest_version, 12);
 
     // Test that a temporary checkpoint file breaks binary search
-    let existing_dir = "../test/tests/data/checkpoints_vacuumed/_delta_lag";
+    let existing_dir = "../test/tests/data/checkpoints_vacuumed/_delta_log";
     let temp_checkpoint = tempfile::NamedTempFile::with_prefix_in(
         "00000000000000000000.checkpoint.parquet.tmp",
         existing_dir,

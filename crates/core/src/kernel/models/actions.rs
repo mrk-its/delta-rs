@@ -1044,7 +1044,7 @@ pub struct CheckpointMetadata {
 #[serde(rename_all = "camelCase")]
 pub struct Sidecar {
     /// The name of the sidecar file (not a path).
-    /// The file must reside in the _delta_lag/_sidecars directory.
+    /// The file must reside in the _delta_log/_sidecars directory.
     pub file_name: String,
 
     /// The size of the sidecar file in bytes

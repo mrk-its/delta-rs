@@ -132,7 +132,7 @@ def test_read_simple_table_using_options_to_dict():
     ],
 )
 def test_load_as_version_datetime(date_value: str, expected_version):
-    log_dir = "../crates/test/tests/data/simple_table/_delta_lag"
+    log_dir = "../crates/test/tests/data/simple_table/_delta_log"
     log_mtime_pair = [
         ("00000000000000000000.json", 1588398451.0),
         ("00000000000000000001.json", 1588484851.0),
@@ -174,7 +174,7 @@ def test_load_as_version_datetime_with_logs_removed(
     expected_version,
     log_mtime_pairs: list[tuple[str, int]],
 ):
-    log_path = tmp_path / "_delta_lag"
+    log_path = tmp_path / "_delta_log"
     for i in range(6):
         write_deltalake(tmp_path, data=sample_table, mode="append")
 

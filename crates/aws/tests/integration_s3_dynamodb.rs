@@ -123,7 +123,7 @@ async fn test_create_s3_table() -> TestResult<()> {
     let _put = log_store
         .object_store(None)
         .put_opts(
-            &Path::from("_delta_lag/_commit_failed.tmp"),
+            &Path::from("_delta_log/_commit_failed.tmp"),
             payload,
             PutOptions::default(),
         )
@@ -539,7 +539,7 @@ async fn validate_lock_table_state(table: &DeltaTable, expected_version: i64) ->
 }
 
 /// Check commit entry for consistency.
-/// - `temp_path` must start with `_delta_lag`
+/// - `temp_path` must start with `_delta_log`
 /// - `expire_time != None` <==> `complete == true`
 /// - `expire_time` roughly 24h in the future
 fn validate_commit_entry(entry: &CommitEntry) -> TestResult<()> {
@@ -551,6 +551,6 @@ fn validate_commit_entry(entry: &CommitEntry) -> TestResult<()> {
     } else {
         assert_eq!(entry.expire_time, None);
     }
-    assert!(entry.temp_path.prefix_matches(&Path::from("_delta_lag")));
+    assert!(entry.temp_path.prefix_matches(&Path::from("_delta_log")));
     Ok(())
 }

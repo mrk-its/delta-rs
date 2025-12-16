@@ -301,7 +301,7 @@ impl Snapshot {
     ) -> DeltaResult<BoxStream<'_, DeltaResult<Option<CommitInfo>>>> {
         let store = log_store.root_object_store(None);
 
-        let log_root = self.table_root_path()?.child("_delta_lag");
+        let log_root = self.table_root_path()?.child("_delta_log");
         let start_from = log_root.child(
             format!(
                 "{:020}",

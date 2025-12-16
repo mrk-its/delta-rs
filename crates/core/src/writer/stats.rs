@@ -995,7 +995,7 @@ mod tests {
     }
 
     fn create_temp_table(table_path: &Path) {
-        let log_path = table_path.join("_delta_lag");
+        let log_path = table_path.join("_delta_log");
 
         std::fs::create_dir(log_path.as_path()).unwrap();
         std::fs::write(

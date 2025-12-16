@@ -379,7 +379,7 @@ impl DeltaTable {
                 //
                 // https://github.com/delta-io/delta/blob/master/PROTOCOL.md#delta-log-entries
                 // "Delta files are stored as JSON in a directory at the *root* of the table
-                // named _delta_lag, and ... make up the log of all changes that have occurred to a table."
+                // named _delta_log, and ... make up the log of all changes that have occurred to a table."
                 continue;
             }
             if let Some(log_version) = extract_version_from_filename(obj_meta.location.as_ref()) {
@@ -457,8 +457,8 @@ impl std::fmt::Debug for DeltaTable {
 /// equivalency failures
 ///
 /// ```ignore
-///  left.join("_delta_lag"); // produces `s3://bucket/prefix/_delta_lag`
-///  right.join("_delta_lag"); // produces `s3://bucket/_delta_lag`
+///  left.join("_delta_log"); // produces `s3://bucket/prefix/_delta_log`
+///  right.join("_delta_log"); // produces `s3://bucket/_delta_log`
 /// ```
 pub fn normalize_table_url(url: &Url) -> Url {
     let mut new_segments = vec![];

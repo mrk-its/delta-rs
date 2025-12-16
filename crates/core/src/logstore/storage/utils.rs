@@ -13,7 +13,7 @@ use crate::kernel::Add;
 /// # use deltalake_core::logstore::*;
 /// use object_store::path::Path;
 /// let uri = commit_uri_from_version(1);
-/// assert_eq!(uri, Path::from("_delta_lag/00000000000000000001.json"));
+/// assert_eq!(uri, Path::from("_delta_log/00000000000000000001.json"));
 /// ```
 pub fn commit_uri_from_version(version: i64) -> Path {
     let version = format!("{version:020}.json");

@@ -60,7 +60,7 @@ def test_roundtrip_basic(
     write_deltalake(tmp_path, sample_data_pyarrow)
     end_time = datetime.now().timestamp()
 
-    assert ("0" * 20 + ".json") in os.listdir(tmp_path / "_delta_lag")
+    assert ("0" * 20 + ".json") in os.listdir(tmp_path / "_delta_log")
 
     delta_table = DeltaTable(tmp_path)
     assert pa.schema(delta_table.schema()) == sample_data_pyarrow.schema
@@ -605,7 +605,7 @@ def test_write_modes(tmp_path: pathlib.Path, sample_table: Table):
         sample_table,
         mode="ignore",
     )
-    assert ("0" * 19 + "1.json") not in os.listdir(tmp_path / "_delta_lag")
+    assert ("0" * 19 + "1.json") not in os.listdir(tmp_path / "_delta_log")
 
     write_deltalake(
         tmp_path,
@@ -817,8 +817,8 @@ def test_writer_partitioning(tmp_path: pathlib.Path):
 
 
 def get_log_path(table: DeltaTable) -> str:
-    """Returns _delta_lag path for this delta table."""
-    return table._table.table_uri() + "/_delta_lag/" + ("0" * 20 + ".json")
+    """Returns _delta_log path for this delta table."""
+    return table._table.table_uri() + "/_delta_log/" + ("0" * 20 + ".json")
 
 
 def get_add_actions(table: DeltaTable) -> list[str]:
@@ -1974,13 +1974,13 @@ def test_roundtrip_cdc_evolution(tmp_path: pathlib.Path):
 {"protocol":{"minReaderVersion":1,"minWriterVersion":7,"writerFeatures":["changeDataFeed"]}}
 """
     # timestampNtz looks like it might be an unnecessary requirement to write from Python
-    os.mkdir(os.path.join(tmp_path, "_delta_lag"))
+    os.mkdir(os.path.join(tmp_path, "_delta_log"))
     # This is a stupid hack to make sure we have a CDC capable table from the jump
     with open(
-        os.path.join(tmp_path, "_delta_lag", "00000000000000000000.json"), "w+"
+        os.path.join(tmp_path, "_delta_log", "00000000000000000000.json"), "w+"
     ) as fd:
         fd.write(raw_commit)
-    assert ("0" * 20 + ".json") in os.listdir(tmp_path / "_delta_lag")
+    assert ("0" * 20 + ".json") in os.listdir(tmp_path / "_delta_log")
 
     # Make sure the _change_data doesn't exist
     assert not os.path.isdir(os.path.join(tmp_path, "_change_data"))
@@ -2005,7 +2005,7 @@ def test_roundtrip_cdc_evolution(tmp_path: pathlib.Path):
         mode="append",
         schema_mode="merge",
     )
-    assert ("0" * 19 + "1.json") in os.listdir(tmp_path / "_delta_lag")
+    assert ("0" * 19 + "1.json") in os.listdir(tmp_path / "_delta_log")
 
     delta_table = DeltaTable(tmp_path)
     delta_table.update(predicate="utf8 = '1'", updates={"utf8": "'hello world'"})

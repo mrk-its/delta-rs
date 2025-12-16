@@ -175,7 +175,7 @@ mod tests {
     }
 
     pub fn delta_path_for_version(version: u64, suffix: &str) -> Path {
-        let path = format!("_delta_lag/{version:020}.{suffix}");
+        let path = format!("_delta_log/{version:020}.{suffix}");
         Path::from(path.as_str())
     }
 
@@ -231,7 +231,7 @@ mod tests {
         let url = Url::from_directory_path(tmp.path()).unwrap();
         let storage = get_handler();
         let files = storage
-            .list_from(&url.join("_delta_lag").unwrap().join("0").unwrap())
+            .list_from(&url.join("_delta_log").unwrap().join("0").unwrap())
             .unwrap();
         let mut len = 0;
         for (file, expected) in files.zip(expected_names.iter()) {

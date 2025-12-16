@@ -5,11 +5,11 @@
 //!
 //! The "symlink_format_manifest" is not something that has been well documented, but for
 //! enon-partitioned tables this will generate a `_symlink_format_manifest/manifest` file next to
-//! the `_delta_lag`, for example:
+//! the `_delta_log`, for example:
 //!
 //! ```ignore
 //! COVID-19_NYT
-//! ├── _delta_lag
+//! ├── _delta_log
 //! │   ├── 00000000000000000000.crc
 //! │   └── 00000000000000000000.json
 //! ├── part-00000-a496f40c-e091-413a-85f9-b1b69d4b3b4e-c000.snappy.parquet
@@ -29,7 +29,7 @@
 //!
 //! ```ignore
 //! delta-0.8.0-partitioned
-//! ├── _delta_lag
+//! ├── _delta_log
 //! │   └── 00000000000000000000.json
 //! ├── _symlink_format_manifest
 //! │   ├── year=2020

@@ -199,9 +199,9 @@ impl<'de> Visitor<'de> for SnapshotVisitor {
         let log_root = if !table_url.path().ends_with("/") {
             let mut aux = table_url.clone();
             aux.set_path(&format!("{}/", table_url.path()));
-            aux.join("_delta_lag/").unwrap()
+            aux.join("_delta_log/").unwrap()
         } else {
-            table_url.join("_delta_lag/").unwrap()
+            table_url.join("_delta_log/").unwrap()
         };
 
         let log_segment = LogSegment::try_new(listed_log_files, log_root, Some(version as u64))

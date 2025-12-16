@@ -166,7 +166,7 @@ async fn verify_store(integration: &IntegrationContext, root_path: &str) -> Test
     let files = storage.list_with_delimiter(None).await?;
     assert_eq!(
         vec![
-            Path::parse("_delta_lag").unwrap(),
+            Path::parse("_delta_log").unwrap(),
             Path::parse("x=A%2FA").unwrap(),
             Path::parse("x=B%20B").unwrap(),
         ],

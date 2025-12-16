@@ -23,11 +23,11 @@ Now inspect the files created in storage:
 ```
 tmp/some-table
 ├── 0-62dffa23-bbe1-4496-8fb5-bff6724dc677-0.parquet
-└── _delta_lag
+└── _delta_log
     └── 00000000000000000000.json
 ```
 
-The Parquet file stores the data that was written. The `_delta_lag` directory stores metadata about the transactions. Let's inspect the `_delta_lag/00000000000000000000.json` file.
+The Parquet file stores the data that was written. The `_delta_log` directory stores metadata about the transactions. Let's inspect the `_delta_log/00000000000000000000.json` file.
 
 ```json
 {
@@ -95,12 +95,12 @@ Here are the files in storage:
 tmp/some-table
 ├── 0-62dffa23-bbe1-4496-8fb5-bff6724dc677-0.parquet
 ├── 1-57abb6fb-2249-43ba-a7be-cf09bcc230de-0.parquet
-└── _delta_lag
+└── _delta_log
     ├── 00000000000000000000.json
     └── 00000000000000000001.json
 ```
 
-Here are the contents of the `_delta_lag/00000000000000000001.json` file:
+Here are the contents of the `_delta_log/00000000000000000001.json` file:
 
 ```json
 {
@@ -142,13 +142,13 @@ tmp/some-table
 ├── 0-62dffa23-bbe1-4496-8fb5-bff6724dc677-0.parquet
 ├── 1-57abb6fb-2249-43ba-a7be-cf09bcc230de-0.parquet
 ├── 2-95ef2108-480c-4b89-96f0-ff9185dab9ad-0.parquet
-└── _delta_lag
+└── _delta_log
     ├── 00000000000000000000.json
     ├── 00000000000000000001.json
     └── 00000000000000000002.json
 ```
 
-Here are the contents of the `_delta_lag/0002.json` file:
+Here are the contents of the `_delta_log/0002.json` file:
 
 ```json
 {

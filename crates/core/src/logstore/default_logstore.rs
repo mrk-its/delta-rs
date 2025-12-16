@@ -35,7 +35,7 @@ impl DefaultLogStore {
     /// # Arguments
     ///
     /// * `prefixed_store` - A shared reference to an [`object_store::ObjectStore`] with "/"
-    ///   pointing at delta table root (i.e. where `_delta_lag` is located).
+    ///   pointing at delta table root (i.e. where `_delta_log` is located).
     /// * `root_store` - A shared reference to an [`object_store::ObjectStore`] with "/"
     ///   pointing at root of the storage system.
     /// * `location` - A url corresponding to the storage location of `storage`.
