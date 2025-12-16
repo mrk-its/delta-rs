@@ -361,6 +361,7 @@ impl ConvertToDeltaBuilder {
             get_num_idx_cols_and_stats_columns(None, self.configuration.clone());
 
         for file in files {
+            info!("processing file {:#?}", file);
             // A HashMap from partition column to value for this parquet file only
             let mut partition_values = HashMap::new();
             let location = file.location.clone().to_string();
