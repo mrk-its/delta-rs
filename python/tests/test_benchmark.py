@@ -129,7 +129,7 @@ def test_benchmark_optimize(
         optimize_version = initial_version + 1
         try:
             os.remove(
-                os.path.join(tmp_path, "_delta_log", f"{optimize_version:020}.json")
+                os.path.join(tmp_path, "_delta_lag", f"{optimize_version:020}.json")
             )
         except FileNotFoundError:
             pass
@@ -195,7 +195,7 @@ def test_benchmark_optimize_minio(
         optimize_version = initial_version + 1
         try:
             minio.remove_object(
-                bucket_name, f"optimize-test/_delta_log/{optimize_version:020}.json"
+                bucket_name, f"optimize-test/_delta_lag/{optimize_version:020}.json"
             )
         except Exception:
             pass

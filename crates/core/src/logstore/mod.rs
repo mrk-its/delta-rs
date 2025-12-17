@@ -155,7 +155,7 @@ pub fn default_logstore(
 /// Sharable reference to [`LogStore`]
 pub type LogStoreRef = Arc<dyn LogStore>;
 
-static DELTA_LOG_PATH: LazyLock<Path> = LazyLock::new(|| Path::from("_delta_log"));
+static DELTA_LOG_PATH: LazyLock<Path> = LazyLock::new(|| Path::from("_delta_lag"));
 
 pub(crate) static DELTA_LOG_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(\d{20})\.(json|checkpoint(\.\d+)?\.parquet)$").unwrap());
@@ -369,7 +369,7 @@ pub trait LogStore: Send + Sync + AsAny {
     async fn is_delta_table_location(&self) -> DeltaResult<bool> {
         let object_store = self.object_store(None);
         let dummy_url = Url::parse("http://example.com").unwrap();
-        let log_path = Path::from("_delta_log");
+        let log_path = Path::from("_delta_lag");
 
         let mut stream = object_store.list(Some(&log_path));
         while let Some(res) = stream.next().await {
@@ -431,7 +431,7 @@ pub(crate) trait LogStoreExt: LogStore {
     /// The paths is guaranteed to end with a slash,
     /// so that it can be used as a prefix for other paths.
     fn log_root_url(&self) -> Url {
-        self.table_root_url().join("_delta_log/").unwrap()
+        self.table_root_url().join("_delta_lag/").unwrap()
     }
 }
 
@@ -776,8 +776,8 @@ pub(crate) mod tests {
         let config = LogStoreConfig::new(location, StorageConfig::default());
         assert_eq!(config.location().to_string(), "nonexistent://table/");
         assert_eq!(
-            config.location().join("_delta_log/").unwrap(),
-            Url::parse("nonexistent://table/_delta_log/").unwrap()
+            config.location().join("_delta_lag/").unwrap(),
+            Url::parse("nonexistent://table/_delta_lag/").unwrap()
         );
     }
 
@@ -813,7 +813,7 @@ pub(crate) mod tests {
         let table_url = store.table_root_url();
         assert!(table_url.path().ends_with('/'));
         let log_url = store.log_root_url();
-        assert!(log_url.path().ends_with("_delta_log/"));
+        assert!(log_url.path().ends_with("_delta_lag/"));
     }
 
     #[tokio::test]
@@ -836,7 +836,7 @@ pub(crate) mod tests {
         let _put = store
             .object_store(None)
             .put_opts(
-                &Path::from("_delta_log/_commit_failed.tmp"),
+                &Path::from("_delta_lag/_commit_failed.tmp"),
                 payload,
                 PutOptions::default(),
             )
@@ -869,7 +869,7 @@ pub(crate) mod tests {
         let _put = store
             .object_store(None)
             .put_opts(
-                &Path::from("_delta_log/00000000000000000000.json"),
+                &Path::from("_delta_lag/00000000000000000000.json"),
                 payload,
                 PutOptions::default(),
             )
@@ -903,7 +903,7 @@ pub(crate) mod tests {
         let _put = store
             .object_store(None)
             .put_opts(
-                &Path::from("_delta_log/00000000000000000000.checkpoint.parquet"),
+                &Path::from("_delta_lag/00000000000000000000.checkpoint.parquet"),
                 payload,
                 PutOptions::default(),
             )
@@ -938,7 +938,7 @@ pub(crate) mod tests {
         let _put = store
             .object_store(None)
             .put_opts(
-                &Path::from("_delta_log/.00000000000000000000.crc.crc"),
+                &Path::from("_delta_lag/.00000000000000000000.crc.crc"),
                 payload.clone(),
                 PutOptions::default(),
             )
@@ -948,7 +948,7 @@ pub(crate) mod tests {
         let _put = store
             .object_store(None)
             .put_opts(
-                &Path::from("_delta_log/.00000000000000000000.json.crc"),
+                &Path::from("_delta_lag/.00000000000000000000.json.crc"),
                 payload.clone(),
                 PutOptions::default(),
             )
@@ -958,7 +958,7 @@ pub(crate) mod tests {
         let _put = store
             .object_store(None)
             .put_opts(
-                &Path::from("_delta_log/00000000000000000000.crc"),
+                &Path::from("_delta_lag/00000000000000000000.crc"),
                 payload.clone(),
                 PutOptions::default(),
             )
@@ -969,7 +969,7 @@ pub(crate) mod tests {
         let _put = store
             .object_store(None)
             .put_opts(
-                &Path::from("_delta_log/00000000000000000000.json"),
+                &Path::from("_delta_lag/00000000000000000000.json"),
                 payload.clone(),
                 PutOptions::default(),
             )
@@ -990,7 +990,7 @@ pub(crate) mod tests {
     async fn test_peek_with_invalid_json() -> DeltaResult<()> {
         use crate::logstore::object_store::memory::InMemory;
         let memory_store = Arc::new(InMemory::new());
-        let log_path = Path::from("delta-table/_delta_log/00000000000000000001.json");
+        let log_path = Path::from("delta-table/_delta_lag/00000000000000000001.json");
 
         let log_content = r#"{invalid_json"#;
 

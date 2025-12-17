@@ -21,7 +21,7 @@ def clean_data_dir(data_path):
 
 def print_log_dir(path):
     # Show log contents
-    log_path = os.path.join(path, "_delta_log")
+    log_path = os.path.join(path, "_delta_lag")
     if os.path.exists(log_path):
         print("Delta log contents:")
         for file in sorted(os.listdir(log_path)):

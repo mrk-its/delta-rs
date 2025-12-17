@@ -27,7 +27,7 @@ use crate::{DeltaResult, DeltaTableError};
 use crate::{DeltaTable, open_table_with_version};
 
 static CHECKPOINT_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"_delta_log/(\d{20})\.(checkpoint).*$").unwrap());
+    LazyLock::new(|| Regex::new(r"_delta_lag/(\d{20})\.(checkpoint).*$").unwrap());
 
 /// Creates checkpoint for a given table version, table state and object store
 #[tracing::instrument(skip(log_store), fields(operation = "checkpoint", version = version, table_uri = %log_store.root_url()))]
@@ -351,7 +351,7 @@ mod tests {
         assert!(res.is_ok());
 
         // Look at the "files" and verify that the _last_checkpoint has the right version
-        let log_path = Path::from("_delta_log");
+        let log_path = Path::from("_delta_lag");
         let store = table.log_store().object_store(None);
         let last_checkpoint = read_last_checkpoint(store.as_ref(), &log_path)
             .await
@@ -380,9 +380,9 @@ mod tests {
                  * version 0 checkpoint.
                  * E.g.
                  *
-                 * Path { raw: "_delta_log/00000000000000000000.json" }
-                 * Path { raw: "_delta_log/00000000000000000001.checkpoint.parquet" }
-                 * Path { raw: "_delta_log/_last_checkpoint" }
+                 * Path { raw: "_delta_lag/00000000000000000000.json" }
+                 * Path { raw: "_delta_lag/00000000000000000001.checkpoint.parquet" }
+                 * Path { raw: "_delta_lag/_last_checkpoint" }
                  *
                  */
                 panic!(
@@ -506,7 +506,7 @@ mod tests {
             assert!(res.is_ok());
 
             // Look at the "files" and verify that the _last_checkpoint has the right version
-            let log_path = Path::from("_delta_log");
+            let log_path = Path::from("_delta_lag");
             let store = table.log_store().object_store(None);
             let last_checkpoint = read_last_checkpoint(store.as_ref(), &log_path)
                 .await
@@ -547,7 +547,7 @@ mod tests {
             assert_eq!(count, 0);
             println!("{count:?}");
 
-            let path = Path::from("_delta_log/00000000000000000000.json");
+            let path = Path::from("_delta_lag/00000000000000000000.json");
             let res = table.log_store().object_store(None).get(&path).await;
             assert!(res.is_ok());
         }

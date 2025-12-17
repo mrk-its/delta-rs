@@ -112,7 +112,7 @@ mod protocol;
 #[cfg(feature = "datafusion")]
 mod state;
 
-const DELTA_LOG_FOLDER: &str = "_delta_log";
+const DELTA_LOG_FOLDER: &str = "_delta_lag";
 pub(crate) const DEFAULT_RETRIES: usize = 15;
 
 #[derive(Default, Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -1011,9 +1011,9 @@ mod tests {
     #[test]
     fn test_commit_uri_from_version() {
         let version = commit_uri_from_version(0);
-        assert_eq!(version, Path::from("_delta_log/00000000000000000000.json"));
+        assert_eq!(version, Path::from("_delta_lag/00000000000000000000.json"));
         let version = commit_uri_from_version(123);
-        assert_eq!(version, Path::from("_delta_log/00000000000000000123.json"))
+        assert_eq!(version, Path::from("_delta_lag/00000000000000000123.json"))
     }
 
     #[tokio::test]
@@ -1025,7 +1025,7 @@ mod tests {
             store.clone(),
             crate::logstore::LogStoreConfig::new(url, StorageConfig::default()),
         );
-        let version_path = Path::from("_delta_log/00000000000000000000.json");
+        let version_path = Path::from("_delta_lag/00000000000000000000.json");
         store.put(&version_path, PutPayload::new()).await.unwrap();
 
         let res = log_store

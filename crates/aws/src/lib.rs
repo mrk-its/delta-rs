@@ -756,7 +756,7 @@ fn num_attr<T: ToString>(n: T) -> AttributeValue {
     AttributeValue::N(n.to_string())
 }
 
-static DELTA_LOG_PATH: LazyLock<Path> = LazyLock::new(|| Path::from("_delta_log"));
+static DELTA_LOG_PATH: LazyLock<Path> = LazyLock::new(|| Path::from("_delta_lag"));
 static DELTA_LOG_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(\d{20})\.(json|checkpoint).*$").unwrap());
 
@@ -817,7 +817,7 @@ mod tests {
         commit_entry_roundtrip(
             &CommitEntry::builder()
                 .version(0)
-                .temp_path(Path::from("_delta_log/tmp/0_abc.json"))
+                .temp_path(Path::from("_delta_lag/tmp/0_abc.json"))
                 .complete(true)
                 .expire_time(system_time)
                 .build(),
@@ -825,7 +825,7 @@ mod tests {
         commit_entry_roundtrip(
             &CommitEntry::builder()
                 .version(139)
-                .temp_path(Path::from("_delta_log/tmp/0_abc.json"))
+                .temp_path(Path::from("_delta_lag/tmp/0_abc.json"))
                 .build(),
         )?;
         Ok(())

@@ -27,7 +27,7 @@ async fn read_null_partitions_from_checkpoint() {
         .table_url()
         .to_file_path()
         .expect("Failed to convert to file path")
-        .join("_delta_log");
+        .join("_delta_lag");
 
     let add = |partition: Option<String>| Add {
         partition_values: HashMap::from([("color".to_string(), partition)]),

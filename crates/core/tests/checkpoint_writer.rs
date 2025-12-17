@@ -18,7 +18,7 @@ mod simple_checkpoint {
     async fn simple_checkpoint_test() {
         let table_location = "../test/tests/data/checkpoints";
         let table_path = PathBuf::from(table_location);
-        let log_path = table_path.join("_delta_log");
+        let log_path = table_path.join("_delta_lag");
 
         // Delete checkpoint files from previous runs
         cleanup_checkpoint_files(log_path.as_path());
@@ -160,7 +160,7 @@ mod delete_expired_delta_log_in_checkpoint {
             .expect("Failed toc convert the table's Url to a file path");
         let set_file_last_modified = |version: usize, last_modified_millis: u64| {
             let mut path = table_path.clone();
-            path.push("_delta_log");
+            path.push("_delta_lag");
             path.push(format!("{version:020}.json"));
             let file = OpenOptions::new().write(true).open(path).unwrap();
             let last_modified = SystemTime::now().sub(Duration::from_millis(last_modified_millis));
@@ -244,7 +244,7 @@ mod delete_expired_delta_log_in_checkpoint {
             .expect("Failed toc convert the table's Url to a file path");
         let set_file_last_modified = |version: usize, last_modified_millis: u64, suffix: &str| {
             let mut path = table_path.clone();
-            path.push("_delta_log");
+            path.push("_delta_lag");
             path.push(format!("{version:020}.{suffix}"));
             let file = OpenOptions::new().write(true).open(path).unwrap();
             let last_modified = SystemTime::now().sub(Duration::from_millis(last_modified_millis));

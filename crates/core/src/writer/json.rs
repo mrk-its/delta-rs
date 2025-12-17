@@ -736,7 +736,7 @@ mod tests {
             writer.write(vec![data.clone()]).await.unwrap();
             writer.flush_and_commit(&mut table).await.unwrap();
         }
-        let dir_path = path + "/_delta_log";
+        let dir_path = path + "/_delta_lag";
 
         let target_file = "00000000000000000004.checkpoint.parquet";
         let entries: Vec<_> = fs::read_dir(dir_path)

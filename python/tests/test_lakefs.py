@@ -559,9 +559,9 @@ def test_checkpoint(sample_table: Table, lakefs_storage_options, lakefs_client):
 
     table = str(uuid.uuid4())
     tmp_table_path = os.path.join("lakefs://bronze/main", table)
-    checkpoint_path = os.path.join(table, "_delta_log", "_last_checkpoint")
+    checkpoint_path = os.path.join(table, "_delta_lag", "_last_checkpoint")
     last_checkpoint_path = os.path.join(
-        table, "_delta_log", "00000000000000000000.checkpoint.parquet"
+        table, "_delta_lag", "00000000000000000000.checkpoint.parquet"
     )
 
     branch = lakefs.Branch(

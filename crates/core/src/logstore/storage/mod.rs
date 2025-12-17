@@ -17,7 +17,7 @@ pub(super) mod retry_ext;
 pub(super) mod runtime;
 pub(super) mod utils;
 
-static DELTA_LOG_PATH: LazyLock<Path> = LazyLock::new(|| Path::from("_delta_log"));
+static DELTA_LOG_PATH: LazyLock<Path> = LazyLock::new(|| Path::from("_delta_lag"));
 
 /// Sharable reference to [`ObjectStore`]
 pub type ObjectStoreRef = Arc<DynObjectStore>;

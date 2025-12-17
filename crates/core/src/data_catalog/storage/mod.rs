@@ -17,7 +17,7 @@ use crate::logstore::{StorageConfig, store_for};
 use crate::open_table_with_storage_options;
 use crate::table::builder::ensure_table_uri;
 
-const DELTA_LOG_FOLDER: &str = "_delta_log";
+const DELTA_LOG_FOLDER: &str = "_delta_lag";
 
 /// A `SchemaProvider` that scans an `ObjectStore` to automatically discover delta tables.
 ///
