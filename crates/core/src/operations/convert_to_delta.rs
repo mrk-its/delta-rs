@@ -339,7 +339,7 @@ impl ConvertToDeltaBuilder {
 
         object_store
             .list(None)
-            .try_for_each_concurrent(10, |meta| {
+            .try_for_each_concurrent(20, |meta| {
                 info!("Found parquet file {:#?}", meta.location);
                 let object_store = Arc::clone(&object_store);
                 let partition_schema = Arc::clone(&partition_schema);
