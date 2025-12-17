@@ -145,3 +145,6 @@ inherits = "release"
 opt-level = 3
 codegen-units = 1
 lto = "fat"
+
+[patch.crates-io]
+delta_kernel = {path = "../delta-kernel-rs/kernel/"}
