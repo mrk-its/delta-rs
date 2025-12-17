@@ -3,7 +3,7 @@
 use std::collections::{HashMap, HashSet};
 use std::num::TryFromIntError;
 use std::str::{FromStr, Utf8Error};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use arrow_schema::{
     ArrowError, DataType as ArrowDataType, Field as ArrowField, Fields, Schema as ArrowSchema,
@@ -328,142 +328,126 @@ impl ConvertToDeltaBuilder {
 
         // Get all the parquet files in the location
         let object_store = self.log_store().object_store(None);
-        let mut files = Vec::new();
-        object_store
-            .list(None)
-            .try_for_each_concurrent(10, |meta| {
-                if Some("parquet") == meta.location.extension() {
-                    if meta.location.as_ref() <= "~" {
-                        debug!("Found parquet file {:#?}", meta.location);
-                        files.push(meta);
-                    }
-                }
-                future::ready(Ok(()))
-            })
-            .await?;
-
-        if files.is_empty() {
-            return Err(Error::ParquetFileNotFound);
-        }
-
-        // Iterate over the parquet files. Parse partition columns, generate add actions and collect parquet file schemas
-        let mut arrow_schemas = Vec::new();
-        let mut actions = Vec::new();
-        // partition columns that were defined by caller and are expected to apply on this table
-        let mut expected_partitions: HashMap<String, StructField> = self.partition_schema.clone();
-        // A HashSet of all unique partition columns in a Parquet table
-        let mut partition_columns = HashSet::new();
-        // A vector of StructField of all unique partition columns in a Parquet table
-        let mut partition_schema_fields = HashMap::new();
-
+        let partition_schema = Arc::new(self.partition_schema.clone());
         // Obtain settings on which columns to skip collecting stats on if any
         let (num_indexed_cols, stats_columns) =
             get_num_idx_cols_and_stats_columns(None, self.configuration.clone());
 
-        for file in files {
-            info!("processing file {:?}", file.location);
-            // A HashMap from partition column to value for this parquet file only
-            let mut partition_values = HashMap::new();
-            let location = file.location.clone().to_string();
-            let mut iter = location.split('/').peekable();
-            let mut subpath = iter.next();
+        let stats_columns = Arc::new(stats_columns);
+        let mut actions = Arc::new(Mutex::new(Vec::new()));
+        let mut arrow_schemas = Arc::new(Mutex::new(Vec::new()));
 
-            // Get partitions from subpaths. Skip the last subpath
-            while iter.peek().is_some() {
-                let curr_path = subpath.unwrap();
-                let (key, value) = curr_path
-                    .split_once('=')
-                    .ok_or(Error::MissingPartitionSchema)?;
+        object_store
+            .list(None)
+            .try_for_each_concurrent(10, |meta| {
+                info!("Found parquet file {:#?}", meta.location);
+                let object_store = Arc::clone(&object_store);
+                let partition_schema = Arc::clone(&partition_schema);
+                let stats_columns = Arc::clone(&stats_columns);
+                let actions = Arc::clone(&actions);
+                let arrow_schemas = Arc::clone(&arrow_schemas);
 
-                if partition_columns.insert(key.to_string()) {
-                    if let Some(schema) = expected_partitions.remove(key) {
-                        partition_schema_fields.insert(key.to_string(), schema);
-                    } else {
-                        // Return an error if the schema of a partition column is not provided by user
-                        return Err(Error::MissingPartitionSchema);
+                let file = meta.clone();
+                async move {
+                    if Some("parquet") == meta.location.extension() && meta.location.as_ref() <= "~" {
+                        let mut partition_values = HashMap::new();
+                        let location = file.location.clone().to_string();
+                        let mut iter = location.split('/').peekable();
+                        let mut subpath = iter.next();
+
+                        // Get partitions from subpaths. Skip the last subpath
+                        while iter.peek().is_some() {
+                            let curr_path = subpath.unwrap();
+                            let (key, value) = curr_path
+                                .split_once('=')
+                                .ok_or(Error::MissingPartitionSchema).unwrap(); // mrk
+
+                            // Safety: we just checked that the key is present in the map
+                            let field = partition_schema.get(key).unwrap();
+                            let scalar = if value == NULL_PARTITION_VALUE_DATA_PATH {
+                                Ok(delta_kernel::expressions::Scalar::Null(
+                                    field.data_type().clone(),
+                                ))
+                            } else {
+                                let decoded = percent_decode_str(value).decode_utf8().unwrap(); // mrk
+                                match field.data_type() {
+                                    DataType::Primitive(p) => p.parse_scalar(decoded.as_ref()),
+                                    _ => Err(delta_kernel::Error::Generic(format!(
+                                        "Expected primitive type, found: {:?}",
+                                        field.data_type()
+                                    ))),
+                                }
+                            }
+                            .map_err(|_| Error::MissingPartitionSchema).unwrap(); // mrk
+
+                            partition_values.insert(key.to_string(), scalar);
+
+                            subpath = iter.next();
+                            
+                        }
+
+
+                        let object_reader =
+                            ParquetObjectReader::new(object_store.clone(), file.location.clone())
+                                .with_file_size(file.size);
+
+                        let batch_builder = ParquetRecordBatchStreamBuilder::new(object_reader).await.unwrap();
+                        let mut arrow_schema = batch_builder.schema().as_ref().clone();
+
+                        // Arrow schema of Parquet files may have conflicting metadata
+                        // Since Arrow schema metadata is not used to generate Delta table schema, we set the metadata field to an empty HashMap
+                        arrow_schema.metadata = HashMap::new();
+                        arrow_schemas.lock().unwrap().push(arrow_schema);
+
+                        // Fetch the stats
+                        let parquet_metadata = batch_builder.metadata();
+                        let stats = stats_from_parquet_metadata(
+                            &IndexMap::from_iter(partition_values.clone().into_iter()),
+                            parquet_metadata.as_ref(),
+                            num_indexed_cols,
+                            &stats_columns,
+                        )
+                        .map_err(|e| Error::DeltaTable(e.into())).unwrap();
+                        let stats_string =
+                            serde_json::to_string(&stats).map_err(|e| Error::DeltaTable(e.into())).unwrap();
+                        actions.lock().unwrap().push(
+                            Add {
+                                path: percent_decode_str(file.location.as_ref())
+                                    .decode_utf8().unwrap() // mrk
+                                    .to_string(),
+                                size: i64::try_from(file.size).unwrap(), // mrk
+                                partition_values: partition_values
+                                    .into_iter()
+                                    .map(|(k, v)| {
+                                        (
+                                            k,
+                                            if v.is_null() {
+                                                None
+                                            } else {
+                                                Some(v.serialize())
+                                            },
+                                        )
+                                    })
+                                    .collect(),
+                                modification_time: file.last_modified.timestamp_millis(),
+                                data_change: true,
+                                stats: Some(stats_string),
+                                ..Default::default()
+                            }
+                            .into(),
+                        );
                     }
+                    Ok(())
                 }
+            })
+            .await?;
 
-                // Safety: we just checked that the key is present in the map
-                let field = partition_schema_fields.get(key).unwrap();
-                let scalar = if value == NULL_PARTITION_VALUE_DATA_PATH {
-                    Ok(delta_kernel::expressions::Scalar::Null(
-                        field.data_type().clone(),
-                    ))
-                } else {
-                    let decoded = percent_decode_str(value).decode_utf8()?;
-                    match field.data_type() {
-                        DataType::Primitive(p) => p.parse_scalar(decoded.as_ref()),
-                        _ => Err(delta_kernel::Error::Generic(format!(
-                            "Expected primitive type, found: {:?}",
-                            field.data_type()
-                        ))),
-                    }
-                }
-                .map_err(|_| Error::MissingPartitionSchema)?;
-
-                partition_values.insert(key.to_string(), scalar);
-
-                subpath = iter.next();
-            }
-
-            let object_reader =
-                ParquetObjectReader::new(object_store.clone(), file.location.clone())
-                    .with_file_size(file.size);
-
-            let batch_builder = ParquetRecordBatchStreamBuilder::new(object_reader).await?;
-
-            // Fetch the stats
-            let parquet_metadata = batch_builder.metadata();
-            let stats = stats_from_parquet_metadata(
-                &IndexMap::from_iter(partition_values.clone().into_iter()),
-                parquet_metadata.as_ref(),
-                num_indexed_cols,
-                &stats_columns,
-            )
-            .map_err(|e| Error::DeltaTable(e.into()))?;
-            let stats_string =
-                serde_json::to_string(&stats).map_err(|e| Error::DeltaTable(e.into()))?;
-
-            actions.push(
-                Add {
-                    path: percent_decode_str(file.location.as_ref())
-                        .decode_utf8()?
-                        .to_string(),
-                    size: i64::try_from(file.size)?,
-                    partition_values: partition_values
-                        .into_iter()
-                        .map(|(k, v)| {
-                            (
-                                k,
-                                if v.is_null() {
-                                    None
-                                } else {
-                                    Some(v.serialize())
-                                },
-                            )
-                        })
-                        .collect(),
-                    modification_time: file.last_modified.timestamp_millis(),
-                    data_change: true,
-                    stats: Some(stats_string),
-                    ..Default::default()
-                }
-                .into(),
-            );
-
-            let mut arrow_schema = batch_builder.schema().as_ref().clone();
-
-            // Arrow schema of Parquet files may have conflicting metadata
-            // Since Arrow schema metadata is not used to generate Delta table schema, we set the metadata field to an empty HashMap
-            arrow_schema.metadata = HashMap::new();
-            arrow_schemas.push(arrow_schema);
+        if actions.lock().unwrap().is_empty() {
+            return Err(Error::ParquetFileNotFound);
         }
 
-        if !expected_partitions.is_empty() {
-            // Partition column provided by the user does not exist in the parquet files
-            return Err(Error::PartitionColumnNotExist);
-        }
+        let arrow_schemas = Arc::try_unwrap(arrow_schemas).unwrap().into_inner().unwrap();
+        let actions = Arc::try_unwrap(actions).unwrap().into_inner().unwrap();
 
         // Merge parquet file schemas
         // This step is needed because timestamp will not be preserved when copying files in S3. We can't use the schema of the latest parquet file as Delta table's schema
@@ -472,13 +456,13 @@ impl ConvertToDeltaBuilder {
         let schema: StructType = (&converted_schema).try_into_kernel()?;
 
         let mut schema_fields = schema.fields().collect_vec();
-        schema_fields.append(&mut partition_schema_fields.values().collect::<Vec<_>>());
+        schema_fields.append(&mut partition_schema.values().collect::<Vec<_>>());
 
         // Generate CreateBuilder with corresponding add actions, schemas and operation meta
         let mut builder = CreateBuilder::new()
             .with_log_store(self.log_store().clone())
             .with_columns(schema_fields.into_iter().cloned())
-            .with_partition_columns(partition_columns.into_iter())
+            .with_partition_columns(partition_schema.keys().into_iter())
             .with_actions(actions)
             .with_save_mode(self.mode)
             .with_configuration(self.configuration)
