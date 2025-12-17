@@ -360,10 +360,16 @@ impl ConvertToDeltaBuilder {
                             let curr_path = subpath.unwrap();
                             let (key, value) = curr_path
                                 .split_once('=')
-                                .ok_or(Error::MissingPartitionSchema).unwrap(); // mrk
+                                .ok_or(ObjectStoreError::Generic {
+                                    store: "missing_part",
+                                    source: Box::new(Error::MissingPartitionSchema)
+                                })?;
 
                             // Safety: we just checked that the key is present in the map
-                            let field = partition_schema.get(key).unwrap();
+                            let field = partition_schema.get(key).ok_or(ObjectStoreError::Generic {
+                                store: "missing_part",
+                                source: Box::new(Error::MissingPartitionSchema)
+                            })?;
                             let scalar = if value == NULL_PARTITION_VALUE_DATA_PATH {
                                 Ok(delta_kernel::expressions::Scalar::Null(
                                     field.data_type().clone(),
@@ -378,7 +384,10 @@ impl ConvertToDeltaBuilder {
                                     ))),
                                 }
                             }
-                            .map_err(|_| Error::MissingPartitionSchema).unwrap(); // mrk
+                            .map_err(|_| ObjectStoreError::Generic {
+                                store: "missing_part",
+                                source: Box::new(Error::MissingPartitionSchema)
+                            })?;
 
                             partition_values.insert(key.to_string(), scalar);
 
